@@ -1,0 +1,49 @@
+﻿using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using TMPro;
+using UnityEngine;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace TalkingCart.Patches
+{
+    [HarmonyPatch(typeof(PlayerController))]
+    class PlayerControllerPatch
+    {
+        public static Vector3 playerPosition = new Vector3();
+
+        [HarmonyPatch("Update")]
+        [HarmonyPostfix]
+        static void UpdatePatch(PlayerController __instance)
+        {
+            playerPosition = __instance.transform.position;
+
+            if(ChatManagerPatch.chatState != ChatManager.ChatState.Active) // Ignore input when player is writing in chat.
+            {
+                if (Input.GetKeyDown(KeyCode.X))
+                {
+                    CartTalkingManager cart = GetGrabbedCart();
+                    if (cart != null) cart.CommunicateNearbyItems();
+                }
+
+                if (Input.GetKeyDown(KeyCode.Z)) // Disable/enable cart communications.
+                {
+                    CartTalkingManager cart = GetGrabbedCart();
+                    if (cart != null) cart.ToggleComms();
+                }
+            }
+        }
+
+        // Returns the cart that the player is grabbing.
+        public static CartTalkingManager GetGrabbedCart()
+        {
+            if (PlayerAvatarPatch.localPlayerPhysGrabber.grabbedObjectTransform != null)
+                return PlayerAvatarPatch.localPlayerPhysGrabber.grabbedObjectTransform.GetComponent<CartTalkingManager>();
+            return null;
+        }
+    }
+}
