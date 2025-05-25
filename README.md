@@ -2,7 +2,7 @@
 
 This mod makes the cart talk with voice and subtitles. The cart will warn the players when an enemy is nearby, let you know when an enemy has despawned/respawned, and tell you how many items are in the vicinity.
 
-It was created as a part of the following YouTube video: 
+It was created as a part of the following YouTube video:  https://youtu.be/naOCUkJkmzk
 
 
 # Supported Features
