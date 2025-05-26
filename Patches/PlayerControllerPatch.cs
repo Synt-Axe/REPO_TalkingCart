@@ -24,13 +24,13 @@ namespace TalkingCart.Patches
 
             if(ChatManagerPatch.chatState != ChatManager.ChatState.Active) // Ignore input when player is writing in chat.
             {
-                if (Input.GetKeyDown(KeyCode.X))
+                if (Input.GetKeyDown(ConfigManager.communicateNearbyItemsKey.Value))
                 {
                     CartTalkingManager cart = GetGrabbedCart();
                     if (cart != null) cart.CommunicateNearbyItems();
                 }
 
-                if (Input.GetKeyDown(KeyCode.Z)) // Disable/enable cart communications.
+                if (Input.GetKeyDown(ConfigManager.toggleCommunicationsKey.Value)) // Disable/enable cart communications.
                 {
                     CartTalkingManager cart = GetGrabbedCart();
                     if (cart != null) cart.ToggleComms();

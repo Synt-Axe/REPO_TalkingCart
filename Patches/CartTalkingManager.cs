@@ -281,7 +281,7 @@ namespace TalkingCart.Patches
 
                 if (despawnRespawnTimer[i] < 0) despawnRespawnTimer[i] = 0;
                 despawnRespawnTimer[i] += 1;
-                TalkingCartBase.mls.LogInfo($"Enemy Despawn Counter {despawnRespawnTimer[i]}");
+                //TalkingCartBase.mls.LogInfo($"Enemy Despawn Counter {despawnRespawnTimer[i]}");
 
                 if (despawnRespawnTimer[i] >= 3) // Enemy must remain despawned for 3 second before we communicate to player.
                 {
@@ -313,7 +313,7 @@ namespace TalkingCart.Patches
 
                 if (despawnRespawnTimer[i] > 0) despawnRespawnTimer[i] = 0;
                 despawnRespawnTimer[i] -= 1;
-                TalkingCartBase.mls.LogInfo($"Enemy Respawn Counter {despawnRespawnTimer[i]}");
+                //TalkingCartBase.mls.LogInfo($"Enemy Respawn Counter {despawnRespawnTimer[i]}");
 
                 if (despawnRespawnTimer[i] <= -3) // Enemy must remain respawned for 3 second before we communicate to player.
                 {
@@ -421,7 +421,7 @@ namespace TalkingCart.Patches
             // If communications is off, return.
             if (!isCommEnabled) return;
 
-            TalkingCartBase.mls.LogInfo("Voicing Sound");
+            //TalkingCartBase.mls.LogInfo("Voicing Sound");
 
             // Say the enemy name.
             AudioClip nextClip = cartVoiceQueue.Dequeue();
@@ -522,11 +522,11 @@ namespace TalkingCart.Patches
             // Set the ui text for enable/disable instruction.
             if (isCommEnabled)
             {
-                if (enableInstructionTMP.text != "Click 'z' to disable cart voice.") enableInstructionTMP.text = "Click 'z' to disable cart voice.";
+                if (enableInstructionTMP.text != $"Click '{ConfigManager.toggleCommunicationsKey.Value}' to disable cart voice.") enableInstructionTMP.text = $"Click '{ConfigManager.toggleCommunicationsKey.Value}' to disable cart voice.";
             }
-            else if (enableInstructionTMP.text != "Click 'z' to enable cart voice.") enableInstructionTMP.text = "Click 'z' to enable cart voice.";
+            else if (enableInstructionTMP.text != $"Click '{ConfigManager.toggleCommunicationsKey.Value}' to enable cart voice.") enableInstructionTMP.text = $"Click '{ConfigManager.toggleCommunicationsKey.Value}' to enable cart voice.";
             // Set the ui text for items instruction.
-            if (itemsInstructionTMP.text != "Click 'x' for items count.") itemsInstructionTMP.text = "Click 'x' for items count.";
+            if (itemsInstructionTMP.text != $"Click '{ConfigManager.communicateNearbyItemsKey.Value}' for items count.") itemsInstructionTMP.text = $"Click '{ConfigManager.communicateNearbyItemsKey.Value}' for items count.";
         }
     }
 }

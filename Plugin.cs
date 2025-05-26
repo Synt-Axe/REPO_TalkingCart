@@ -50,6 +50,7 @@ namespace TalkingCart
             }
 
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
+            ConfigManager.Initialize(((BaseUnityPlugin)this).Config);
             mls.LogInfo($"{modGUID} is now awake!");
 
             harmony.PatchAll(typeof(TalkingCartBase));
