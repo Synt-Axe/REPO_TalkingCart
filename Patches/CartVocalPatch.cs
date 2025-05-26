@@ -71,11 +71,11 @@ namespace TalkingCart.Patches
         public static int GetEnemyNameIndex(string enemyName)
         {
             // Get enemy name index.
-            int enemyNameInd = Array.IndexOf(RoundDirectorPatch.enemyNames, enemyName);
+            int enemyNameInd = RoundDirectorPatch.enemyNames.IndexOf(enemyName);
             if (enemyNameInd == -1)
             {
-                TalkingCartBase.mls.LogError($"Couldn't voice enemy name.");
-                return 18; // To not cause an error.
+                TalkingCartBase.mls.LogError($"Adding new enemy"); // TODO
+                return 18;
             }
             return enemyNameInd;
         }

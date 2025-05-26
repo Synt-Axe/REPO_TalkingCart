@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -103,7 +104,7 @@ namespace TalkingCart.Patches
 
             // Check nearby enemies.
             checkTimer -= Time.deltaTime;
-            if (checkTimer <= 0)
+            if (checkTimer <= 0 && RoundDirectorPatch.initialEnemiesCommunicated)
             {
                 // Handle nearby enemies check.
                 HandleNearbyEnemies();
@@ -181,10 +182,10 @@ namespace TalkingCart.Patches
             EnqueueValues(TalkingCartBase.SoundFX[TalkingCartBase.LevelEnemiesVLInd], 0.2f, "Level enemies:");
 
             // Record number of enemies.
-            int[] enemiesCount = new int[19];
+            int[] enemiesCount = new int[RoundDirectorPatch.levelEnemyNames.Count];
             foreach (EnemyParent enemyParent in RoundDirectorPatch.enemyParentList)
             {
-                int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParent.enemyName);
+                int enemyNameInd = RoundDirectorPatch.levelEnemyNames.IndexOf(enemyParent.enemyName);
                 enemiesCount[enemyNameInd]++;
             }
 
@@ -195,27 +196,97 @@ namespace TalkingCart.Patches
                 if (eCount == 0)
                     continue;
 
-                // If there is 1 of that enemy, no need to communicate a number.
-                if (eCount == 1)
+                List<string> modEnemyNames = new List<string>();
+                List<int> modEnemyCounts = new List<int>();
+
+                string enemyName = RoundDirectorPatch.levelEnemyNames[i];
+                // If the enemy is a Vanilla enemy.
+                if (RoundDirectorPatch.enemyNames.Contains(enemyName))
                 {
-                    int vlInd = TalkingCartBase.EnemyNamesSingularInd + i;
-                    EnqueueValues(TalkingCartBase.SoundFX[vlInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[i]);
+                    int vanillaEnemyInd = RoundDirectorPatch.enemyNames.IndexOf(enemyName);
+                    // If there is 1 of that enemy, no need to communicate a number.
+                    if (eCount == 1)
+                    {
+                        int vlInd = TalkingCartBase.EnemyNamesSingularInd + vanillaEnemyInd;
+                        EnqueueValues(TalkingCartBase.SoundFX[vlInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[vanillaEnemyInd]);
+                    }
+                    else
+                    {
+                        // This will for example write "4 Gnomes" twice instead of writing "4" alone and "Gnomes" alone.
+                        string fullText = eCount.ToString() + " " + RoundDirectorPatch.enemyNamesTextPlural[vanillaEnemyInd];
+
+                        // Adding the number vl
+                        int numberVLInd = TalkingCartBase.NumbersInd + eCount;
+                        EnqueueValues(TalkingCartBase.SoundFX[numberVLInd], -0.2f, fullText);
+
+                        // Adding the enemy name vl
+                        int vlInd = TalkingCartBase.EnemyNamesPluralInd + vanillaEnemyInd;
+                        EnqueueValues(TalkingCartBase.SoundFX[vlInd], 0.2f, fullText);
+                    }
+                } else
+                {
+                    // It's a mod enemy.
+                    modEnemyNames.Add(enemyName);
+                    modEnemyCounts.Add(eCount);
+                }
+
+                // If there are mod enemies, we get their vls.
+                if(modEnemyNames.Count > 0) StartCoroutine(GenerateModStarterEnemyNames(modEnemyNames, modEnemyCounts));
+            }
+        }
+
+        IEnumerator GenerateModStarterEnemyNames(List<string> enemyNames, List<int> enemyCounts)
+        {
+            for(int i = 0; i < enemyNames.Count; i++)
+            {
+                string enemyName = enemyNames[i];
+                int enemyCount = enemyCounts[i];
+                AudioClip enemyNameAudioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(enemyName);
+
+                if(enemyNameAudioClip == null)
+                {
+                    while (PlayerControllerPatch.cartTTSVoice.isBusy)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                    }
+                    PlayerControllerPatch.cartTTSVoice.GenerateTTSAndStore(enemyName);
+
+                    int k = 0;
+                    while (enemyNameAudioClip == null)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                        enemyNameAudioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(enemyName);
+                        k++;
+                        if (k > 100)
+                        {
+                            TalkingCartBase.mls.LogError("K > 100, can't get audio clip");
+                            yield break;
+                        }
+                    }
+
+                }
+
+                // Communicate to player.
+                if (enemyCount == 1)
+                {
+                    EnqueueValues(enemyNameAudioClip, 0f, enemyName);
                 }
                 else
                 {
                     // This will for example write "4 Gnomes" twice instead of writing "4" alone and "Gnomes" alone.
-                    string fullText = eCount.ToString() + " " + RoundDirectorPatch.enemyNamesTextPlural[i];
+                    string fullText = enemyCount.ToString() + " " + enemyName;
 
                     // Adding the number vl
-                    int numberVLInd = TalkingCartBase.NumbersInd + eCount;
+                    int numberVLInd = TalkingCartBase.NumbersInd + enemyCount;
                     EnqueueValues(TalkingCartBase.SoundFX[numberVLInd], -0.2f, fullText);
 
                     // Adding the enemy name vl
-                    int vlInd = TalkingCartBase.EnemyNamesPluralInd + i;
-                    EnqueueValues(TalkingCartBase.SoundFX[vlInd], 0.2f, fullText);
+                    EnqueueValues(enemyNameAudioClip, 0.2f, fullText);
                 }
             }
         }
+
+        Coroutine nearbyModCheckCoroutine;
 
         void HandleNearbyEnemies()
         {
@@ -224,13 +295,15 @@ namespace TalkingCart.Patches
             // Check nearby enemies.
             for (int i = 0; i < RoundDirectorPatch.enemyList.Count; i++)
             {
+                //TalkingCartBase.mls.LogInfo($"This is check 1. {RoundDirectorPatch.enemyParentList.Count}, {RoundDirectorPatch.enemyList.Count}, {RoundDirectorPatch.currentEnemyStatus.Count}, {isEnemyNearby.Count}");
                 EnemyParent enemyParentI = RoundDirectorPatch.enemyParentList[i];
                 Enemy enemyI = RoundDirectorPatch.enemyList[i];
                 EnemyStatus enemyStatusI = RoundDirectorPatch.currentEnemyStatus[i];
+                string enemyName = enemyParentI.enemyName;
 
-                int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParentI.enemyName);
-                if (enemyNameInd == 1 || enemyNameInd == 6) // Gnomes and Bangers
-                    continue;
+                //TalkingCartBase.mls.LogInfo($"This is check 2");
+                // If enemy is a gnome or a banger, don't check.
+                if (enemyName == "Banger" || enemyName == "Gnome") continue;
 
                 // If enemy is despawned/dead, don't check.
                 if (enemyStatusI == EnemyStatus.Absent)
@@ -239,36 +312,124 @@ namespace TalkingCart.Patches
                     continue;
                 }
 
+                //TalkingCartBase.mls.LogInfo($"This is check 3");
                 // We get the enemy position.
                 Vector3 enemyPosition = new Vector3(enemyI.transform.position.x, 0f, enemyI.transform.position.z);
 
                 // We check the enemy distance.
                 float distance = Vector3.Distance(cartPosition, enemyPosition);
 
+                // Keeping track of mod enemies.
+                List<int> modEnemyInds = new List<int>();
+                List<bool> nearbyOrLeft = new List<bool>(); // true = nearby, false = left.
+
                 // If enemy is near and we haven't communicated that already.
                 if (distance < 20f && !isEnemyNearby[i])
                 {
-                    TalkingCartBase.mls.LogInfo($"Enemy Nearby: {enemyParentI.enemyName}");
-                    int voiceLineInd = TalkingCartBase.EnemyNearbyInd + enemyNameInd;
-                    EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " nearby");
+                    // If the enemy is a Vanilla enemy.
+                    if (RoundDirectorPatch.enemyNames.Contains(enemyName))
+                    {
+                        int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParentI.enemyName);
+                        TalkingCartBase.mls.LogInfo($"Enemy Nearby: {enemyParentI.enemyName}");
+                        int voiceLineInd = TalkingCartBase.EnemyNearbyInd + enemyNameInd;
+                        EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " nearby");
 
-                    isEnemyNearby[i] = true;
-                    lastCommunicatedStatus[i] = EnemyCommState.Nearby;
+                        isEnemyNearby[i] = true;
+                        lastCommunicatedStatus[i] = EnemyCommState.Nearby;
+                    }
+                    else
+                    {
+                        // It's a mod enemy.
+                        modEnemyInds.Add(i);
+                        nearbyOrLeft.Add(true);
+                    }
+                    
                 }
                 else if (distance > 23f && isEnemyNearby[i]) // A 3 unit buffer so that the cart doesn't spam.
                 {
-                    TalkingCartBase.mls.LogInfo($"Enemy Left Area: {enemyParentI.enemyName}");
-                    int voiceLineInd = TalkingCartBase.EnemyLeftInd + enemyNameInd;
-                    EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " left");
+                    if (RoundDirectorPatch.enemyNames.Contains(enemyName))
+                    {
+                        int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParentI.enemyName);
+                        TalkingCartBase.mls.LogInfo($"Enemy Left Area: {enemyParentI.enemyName}");
+                        int voiceLineInd = TalkingCartBase.EnemyLeftInd + enemyNameInd;
+                        EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " left");
 
-                    isEnemyNearby[i] = false;
-                    lastCommunicatedStatus[i] = EnemyCommState.Nearby;
+                        isEnemyNearby[i] = false;
+                        lastCommunicatedStatus[i] = EnemyCommState.Left;
+                    }
+                    else
+                    {
+                        // It's a mod enemy.
+                        modEnemyInds.Add(i);
+                        nearbyOrLeft.Add(false);
+                    }
+                    
                 }
+
+                // If there are mod enemies, we get their vls.
+                if (modEnemyInds.Count > 0 && nearbyModCheckCoroutine == null) nearbyModCheckCoroutine = StartCoroutine(GenerateModNearbyEnemyNames(modEnemyInds, nearbyOrLeft));
             }
         }
 
+        IEnumerator GenerateModNearbyEnemyNames(List<int> enemyInds, List<bool> nearbyOrLeft)
+        {
+            for (int i = 0; i < enemyInds.Count; i++)
+            {
+                EnemyParent enemyParent = RoundDirectorPatch.enemyParentList[enemyInds[i]];
+                string enemyName = enemyParent.enemyName;
+                bool isNearby = nearbyOrLeft[i];
+                string commText = enemyName + " nearby";
+                if (!isNearby) commText = enemyName + " left";
+
+                AudioClip audioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(commText);
+
+                // If the audio clip wasn't generated before, we generate it.
+                if (audioClip == null)
+                {
+                    while (PlayerControllerPatch.cartTTSVoice.isBusy)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                    }
+                    PlayerControllerPatch.cartTTSVoice.GenerateTTSAndStore(commText);
+
+                    int k = 0;
+                    while (audioClip == null)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                        audioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(commText);
+                        k++;
+                        if (k > 40)
+                        {
+                            TalkingCartBase.mls.LogError($"K > 40, can't get audio clip: {commText}");
+                            nearbyModCheckCoroutine = null;
+                            yield break;
+                        }
+                    }
+                }
+
+                // Communicate to player.
+                EnqueueValues(audioClip, 0f, commText);
+                if (isNearby)
+                {
+                    TalkingCartBase.mls.LogInfo($"Enemy Nearby: {enemyName}");
+                    isEnemyNearby[enemyInds[i]] = true;
+                    lastCommunicatedStatus[enemyInds[i]] = EnemyCommState.Nearby;
+                } else
+                {
+                    TalkingCartBase.mls.LogInfo($"Enemy Left Area: {enemyName}");
+                    isEnemyNearby[enemyInds[i]] = false;
+                    lastCommunicatedStatus[enemyInds[i]] = EnemyCommState.Left;
+                }
+                nearbyModCheckCoroutine = null;
+            }
+        }
+
+        Coroutine despawnModCheckCoroutine;
+
         void HandleDespawnedEnemies()
         {
+            List<int> modEnemyInds = new List<int>();
+
             // We loop through the enemies to see which has despawned.
             for (int i = 0; i < RoundDirectorPatch.enemyList.Count; i++)
             {
@@ -286,21 +447,81 @@ namespace TalkingCart.Patches
                 if (despawnRespawnTimer[i] >= 3) // Enemy must remain despawned for 3 second before we communicate to player.
                 {
                     EnemyParent enemyParentI = RoundDirectorPatch.enemyParentList[i];
-                    TalkingCartBase.mls.LogInfo($"Enemy Despawned End: {enemyParentI.enemyName}");
 
-                    int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParentI.enemyName);
-                    int voiceLineInd = TalkingCartBase.EnemyDespawnedInd + enemyNameInd;
-                    EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " despawned");
+                    // If the enemy is a Vanilla enemy.
+                    if (RoundDirectorPatch.enemyNames.Contains(enemyParentI.enemyName))
+                    {
+                        int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParentI.enemyName);
+                        int voiceLineInd = TalkingCartBase.EnemyDespawnedInd + enemyNameInd;
+                        TalkingCartBase.mls.LogInfo($"Enemy Despawned End: {enemyParentI.enemyName}");
+                        EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " despawned");
 
-                    lastCommunicatedStatus[i] = EnemyCommState.Despawned;
-                    despawnRespawnTimer[i] = 0;
+                        lastCommunicatedStatus[i] = EnemyCommState.Despawned;
+                        despawnRespawnTimer[i] = 0;
+                    }
+                    else
+                    {
+                        // It's a mod enemy.
+                        modEnemyInds.Add(i);
+                    }
+                }
+            }
+
+            // If there are mod enemies, we get their vls.
+            if (modEnemyInds.Count > 0 && despawnModCheckCoroutine == null) despawnModCheckCoroutine = StartCoroutine(GenerateModDespawnedEnemyNames(modEnemyInds));
+        }
+
+        IEnumerator GenerateModDespawnedEnemyNames(List<int> enemyInds)
+        {
+            for (int i = 0; i < enemyInds.Count; i++)
+            {
+                EnemyParent enemyParent = RoundDirectorPatch.enemyParentList[enemyInds[i]];
+                string enemyName = enemyParent.enemyName;
+                string commText = enemyName + " despawned";
+
+                AudioClip audioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(commText);
+
+                // If the audio clip wasn't generated before, we generate it.
+                if (audioClip == null)
+                {
+                    while (PlayerControllerPatch.cartTTSVoice.isBusy)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                    }
+                    PlayerControllerPatch.cartTTSVoice.GenerateTTSAndStore(commText);
+
+                    int k = 0;
+                    while (audioClip == null)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                        audioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(commText);
+                        k++;
+                        if (k > 40)
+                        {
+                            TalkingCartBase.mls.LogError($"K > 40, can't get audio clip: {commText}");
+                            despawnModCheckCoroutine = null;
+                            yield break;
+                        }
+                    }
 
                 }
+
+                // Communicate to player.
+                TalkingCartBase.mls.LogInfo($"Enemy Despawned End: {enemyName}");
+                EnqueueValues(audioClip, 0f, commText);
+                lastCommunicatedStatus[enemyInds[i]] = EnemyCommState.Despawned;
+                despawnRespawnTimer[enemyInds[i]] = 0;
+
+                despawnModCheckCoroutine = null;
             }
         }
 
+        Coroutine respawnModCheckCoroutine;
+
         void HandleRespawnedEnemies()
         {
+            List<int> modEnemyInds = new List<int>();
+
             // We loop through the enemies to see which has respawned.
             for (int i = 0; i < RoundDirectorPatch.enemyList.Count; i++)
             {
@@ -318,18 +539,76 @@ namespace TalkingCart.Patches
                 if (despawnRespawnTimer[i] <= -3) // Enemy must remain respawned for 3 second before we communicate to player.
                 {
                     EnemyParent enemyParentI = RoundDirectorPatch.enemyParentList[i];
-                    TalkingCartBase.mls.LogInfo($"Enemy Respawned End: {enemyParentI.enemyName}");
 
-                    int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParentI.enemyName);
-                    int voiceLineInd = TalkingCartBase.EnemyRespawnedInd + enemyNameInd;
-                    EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " respawned");
+                    // If the enemy is a Vanilla enemy.
+                    if (RoundDirectorPatch.enemyNames.Contains(enemyParentI.enemyName))
+                    {
+                        int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParentI.enemyName);
+                        int voiceLineInd = TalkingCartBase.EnemyRespawnedInd + enemyNameInd;
+                        TalkingCartBase.mls.LogInfo($"Enemy Respawned End: {enemyParentI.enemyName}");
+                        EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " respawned");
 
-                    lastCommunicatedStatus[i] = EnemyCommState.Respawned;
-                    despawnRespawnTimer[i] = 0;
-
+                        lastCommunicatedStatus[i] = EnemyCommState.Respawned;
+                        despawnRespawnTimer[i] = 0;
+                    }
+                    else
+                    {
+                        // It's a mod enemy.
+                        modEnemyInds.Add(i);
+                    }
                 }
             }
+
+            // If there are mod enemies, we get their vls.
+            if (modEnemyInds.Count > 0 && respawnModCheckCoroutine == null) respawnModCheckCoroutine = StartCoroutine(GenerateModRespawnedEnemyNames(modEnemyInds));
         }
+
+        IEnumerator GenerateModRespawnedEnemyNames(List<int> enemyInds)
+        {
+            for (int i = 0; i < enemyInds.Count; i++)
+            {
+                EnemyParent enemyParent = RoundDirectorPatch.enemyParentList[enemyInds[i]];
+                string enemyName = enemyParent.enemyName;
+                string commText = enemyName + " respawned";
+
+                AudioClip audioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(commText);
+
+                // If the audio clip wasn't generated before, we generate it.
+                if (audioClip == null)
+                {
+                    while (PlayerControllerPatch.cartTTSVoice.isBusy)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                    }
+                    PlayerControllerPatch.cartTTSVoice.GenerateTTSAndStore(commText);
+
+                    int k = 0;
+                    while (audioClip == null)
+                    {
+                        yield return new WaitForSeconds(0.1f);
+                        audioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(commText);
+                        k++;
+                        if (k > 40)
+                        {
+                            TalkingCartBase.mls.LogError($"K > 40, can't get audio clip: {commText}");
+                            respawnModCheckCoroutine = null;
+                            yield break;
+                        }
+                    }
+
+                }
+
+                // Communicate to player.
+                TalkingCartBase.mls.LogInfo($"Enemy Respawned End: {enemyName}");
+                EnqueueValues(audioClip, 0f, commText);
+                lastCommunicatedStatus[enemyInds[i]] = EnemyCommState.Respawned;
+                despawnRespawnTimer[enemyInds[i]] = 0;
+
+                respawnModCheckCoroutine = null;
+            }
+        }
+
+        Coroutine deathModCheckCoroutine;
 
         public void HandleDeadEnemy(int enemyInd)
         {
@@ -341,16 +620,65 @@ namespace TalkingCart.Patches
             }
 
             EnemyParent enemyParent = RoundDirectorPatch.enemyParentList[enemyInd];
-            TalkingCartBase.mls.LogInfo($"Enemy Died End: {enemyParent.enemyName}");
-            int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParent.enemyName);
-            if (enemyNameInd == 1 || enemyNameInd == 6) // Gnomes and Bangers
-                return;
+            // If enemy is a gnome or a banger, ignore.
+            if (enemyParent.enemyName == "Banger" || enemyParent.enemyName == "Gnome") return;
 
-            // Adding the voice to queue.
-            int voiceLineInd = TalkingCartBase.EnemyDiedInd + enemyNameInd;
-            EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " died");
+            // Checking if it's a vanilla enemy.
+            if (RoundDirectorPatch.enemyNames.Contains(enemyParent.enemyName))
+            {
+                // Adding the voice to queue.
+                TalkingCartBase.mls.LogInfo($"Enemy Died End: {enemyParent.enemyName}");
+                int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(enemyParent.enemyName);
+                int voiceLineInd = TalkingCartBase.EnemyDiedInd + enemyNameInd;
+                EnqueueValues(TalkingCartBase.SoundFX[voiceLineInd], 0.2f, RoundDirectorPatch.enemyNamesTextSingular[enemyNameInd] + " died");
 
+                lastCommunicatedStatus[enemyInd] = EnemyCommState.Dead;
+            }
+            else
+            {
+                // It's a mod enemy.
+                if(deathModCheckCoroutine == null) deathModCheckCoroutine = StartCoroutine(GenerateModDeadEnemyName(enemyInd));
+            }
+        }
+
+        IEnumerator GenerateModDeadEnemyName(int enemyInd)
+        {
+            string enemyName = RoundDirectorPatch.enemyParentList[enemyInd].enemyName;
+            string commText = enemyName + " died";
+
+            AudioClip audioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(commText);
+
+            // If the audio clip wasn't generated before, we generate it.
+            if (audioClip == null)
+            {
+                while (PlayerControllerPatch.cartTTSVoice.isBusy)
+                {
+                    yield return new WaitForSeconds(0.1f);
+                }
+                PlayerControllerPatch.cartTTSVoice.GenerateTTSAndStore(commText);
+
+                int k = 0;
+                while (audioClip == null)
+                {
+                    yield return new WaitForSeconds(0.1f);
+                    audioClip = PlayerControllerPatch.cartTTSVoice.GetTTSClip(commText);
+                    k++;
+                    if (k > 40)
+                    {
+                        TalkingCartBase.mls.LogError($"K > 40, can't get audio clip: {commText}");
+                        deathModCheckCoroutine = null;
+                        yield break;
+                    }
+                }
+
+            }
+
+            // Communicate to player.
+            TalkingCartBase.mls.LogInfo($"Enemy Died End: {enemyName}");
+            EnqueueValues(audioClip, 0f, commText);
             lastCommunicatedStatus[enemyInd] = EnemyCommState.Dead;
+
+            deathModCheckCoroutine = null;
         }
 
 
@@ -399,7 +727,7 @@ namespace TalkingCart.Patches
         /*************QUEUE*************/
         /*******************************/
 
-        void EnqueueValues(AudioClip audioClip, float duration, string text)
+        public void EnqueueValues(AudioClip audioClip, float duration, string text)
         {
             // If comms is off, return.
             if (!isCommEnabled) return;
