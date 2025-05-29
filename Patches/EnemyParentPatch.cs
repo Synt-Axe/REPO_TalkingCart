@@ -17,12 +17,14 @@ namespace TalkingCart.Patches
         {
             if (RoundDirectorPatch.initialEnemiesCommunicated)
             {
-                if (__instance.enemyName == "Banger" || __instance.enemyName == "Gnome") return; // Gnomes and Bangers
+                int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(__instance.enemyName);
+                if (enemyNameInd == 1 || enemyNameInd == 6) // Gnomes and Bangers
+                    return;
 
                 int enemyInd = RoundDirectorPatch.enemyParentList.IndexOf(__instance);
                 RoundDirectorPatch.currentEnemyStatus[enemyInd] = EnemyStatus.Absent;
 
-                TalkingCartBase.mls.LogInfo($"Enemy Despawn Called: {__instance.enemyName}");
+                TalkingCartBase.mls.LogInfo($"Enemy Despawned Start: {__instance.enemyName}");
             }
         }
 
@@ -32,12 +34,14 @@ namespace TalkingCart.Patches
         {
             if (RoundDirectorPatch.initialEnemiesCommunicated)
             {
-                if (__instance.enemyName == "Banger" || __instance.enemyName == "Gnome") return; // Gnomes and Bangers
+                int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(__instance.enemyName);
+                if (enemyNameInd == 1 || enemyNameInd == 6) // Gnomes and Bangers
+                    return;
 
                 int enemyInd = RoundDirectorPatch.enemyParentList.IndexOf(__instance);
                 RoundDirectorPatch.currentEnemyStatus[enemyInd] = EnemyStatus.Present;
 
-                TalkingCartBase.mls.LogInfo($"Enemy Respawn Called: {__instance.enemyName}");
+                TalkingCartBase.mls.LogInfo($"Enemy Respawned Start: {__instance.enemyName}");
             }
         }
     }

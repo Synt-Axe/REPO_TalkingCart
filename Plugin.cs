@@ -2,16 +2,12 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TalkingCart.Patches;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace TalkingCart
 {
@@ -24,7 +20,7 @@ namespace TalkingCart
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
-        public static TalkingCartBase Instance;
+        private static TalkingCartBase Instance;
 
         public static ManualLogSource mls;
 
@@ -44,6 +40,7 @@ namespace TalkingCart
         public static int EnemyRespawnedInd = 117;
 
         public static int NumbersInd = 136;
+
 
         void Awake()
         {
@@ -68,7 +65,7 @@ namespace TalkingCart
             harmony.PatchAll(typeof(ChatManagerPatch));
             harmony.PatchAll(typeof(PlayerAvatarPatch));
             
-            // Importing the sounds.
+
             SoundFX = new List<AudioClip>();
             string FolderLocation = Instance.Info.Location;
             FolderLocation = FolderLocation.TrimEnd("TalkingCart.dll".ToCharArray());

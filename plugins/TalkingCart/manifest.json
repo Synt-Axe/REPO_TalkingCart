@@ -1,9 +1,0 @@
-{
-    "name": "TalkingCart",
-    "version_number": "1.2.0",
-    "website_url": "https://github.com/Synt-Axe/REPO_TalkingCart",
-    "description": "This mod makes the cart talk with voice and subtitles. The cart will warn the players when an enemy is nearby, let you know when an enemy has despawned/respawned, and tell you how many items are in the vicinity.",
-    "dependencies": [
-        "BepInEx-BepInExPack-5.4.2100"
-    ]
-}

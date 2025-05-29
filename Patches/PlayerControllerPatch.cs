@@ -16,15 +16,6 @@ namespace TalkingCart.Patches
     {
         public static Vector3 playerPosition = new Vector3();
 
-        public static CartTTSVoice cartTTSVoice;
-
-        [HarmonyPatch("Start")]
-        [HarmonyPostfix]
-        static void StartPatch()
-        {
-            cartTTSVoice = new GameObject().AddComponent<CartTTSVoice>();
-        }
-
         [HarmonyPatch("Update")]
         [HarmonyPostfix]
         static void UpdatePatch(PlayerController __instance)
@@ -53,15 +44,6 @@ namespace TalkingCart.Patches
             if (PlayerAvatarPatch.localPlayerPhysGrabber.grabbedObjectTransform != null)
                 return PlayerAvatarPatch.localPlayerPhysGrabber.grabbedObjectTransform.GetComponent<CartTalkingManager>();
             return null;
-        }
-
-        static string GetScriptableObjectFileName(ScriptableObject scriptableObject)
-        {
-            // Get the name directly from the object
-            string objectName = scriptableObject.name;
-
-            // In Unity, the name property of an asset typically matches its filename
-            return objectName;
         }
     }
 }

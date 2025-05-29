@@ -20,8 +20,6 @@ namespace TalkingCart.Patches
             RoundDirectorPatch.enemyList.Add(__instance);
             RoundDirectorPatch.currentEnemyStatus.Add(EnemyStatus.Present);
 
-            if(!levelEnemyNames.Contains(___EnemyParent.enemyName)) RoundDirectorPatch.levelEnemyNames.Add(___EnemyParent.enemyName);
-
             // This is doable because the carts are instantiated before the enemies.
             CartVocalPatch.AddEnemyRecordToAllCarts();
         }
