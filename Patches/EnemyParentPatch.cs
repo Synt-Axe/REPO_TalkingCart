@@ -17,7 +17,7 @@ namespace TalkingCart.Patches
         {
             if (RoundDirectorPatch.initialEnemiesCommunicated)
             {
-                int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(__instance.enemyName);
+                int enemyNameInd = Array.IndexOf(RoundDirectorPatch.enemyNames, __instance.enemyName);
                 if (enemyNameInd == 1 || enemyNameInd == 6) // Gnomes and Bangers
                     return;
 
@@ -34,7 +34,7 @@ namespace TalkingCart.Patches
         {
             if (RoundDirectorPatch.initialEnemiesCommunicated)
             {
-                int enemyNameInd = CartVocalPatch.GetEnemyNameIndex(__instance.enemyName);
+                int enemyNameInd = Array.IndexOf(RoundDirectorPatch.enemyNames, __instance.enemyName);
                 if (enemyNameInd == 1 || enemyNameInd == 6) // Gnomes and Bangers
                     return;
 

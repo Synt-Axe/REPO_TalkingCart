@@ -15,6 +15,8 @@ It was created as a part of the following YouTube video:  https://youtu.be/naOCU
 - If an enemy dies, the cart will notify the player.
 - The player can disable the cart's communications by holding it in strong mode and pressing the Z key.
 - The players can trigger the cart to tell them how many items are in the surrounding are by holding the cart in strong mode and pressing the X key.
+- If modded enemies are present in the level, the cart will communicate their info using the game's TTS functionality.
+- The cart's voice reach and all the keybindings are configurable.
 
 # Mod Type
 Client-side.

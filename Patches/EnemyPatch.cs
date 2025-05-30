@@ -16,10 +16,7 @@ namespace TalkingCart.Patches
         static void GetEnemyListedPatch(Enemy __instance, ref EnemyParent ___EnemyParent)
         {
             TalkingCartBase.mls.LogInfo($"Enemy Spawned: {___EnemyParent.enemyName}");
-            RoundDirectorPatch.enemyParentList.Add(___EnemyParent);
-            RoundDirectorPatch.enemyList.Add(__instance);
-            RoundDirectorPatch.currentEnemyStatus.Add(EnemyStatus.Present);
-
+            RoundDirectorPatch.AddEnemy(___EnemyParent, __instance);
             // This is doable because the carts are instantiated before the enemies.
             CartVocalPatch.AddEnemyRecordToAllCarts();
         }

@@ -67,17 +67,5 @@ namespace TalkingCart.Patches
 
             return nearestInd;
         }
-
-        public static int GetEnemyNameIndex(string enemyName)
-        {
-            // Get enemy name index.
-            int enemyNameInd = Array.IndexOf(RoundDirectorPatch.enemyNames, enemyName);
-            if (enemyNameInd == -1)
-            {
-                TalkingCartBase.mls.LogError($"Couldn't voice enemy name.");
-                return 18; // To not cause an error.
-            }
-            return enemyNameInd;
-        }
     }
 }

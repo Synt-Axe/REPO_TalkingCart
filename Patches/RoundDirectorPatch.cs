@@ -36,6 +36,7 @@ namespace TalkingCart.Patches
         public static bool initialEnemiesCommunicated = false;
         public static List<EnemyParent> enemyParentList = new List<EnemyParent>();
         public static List<Enemy> enemyList = new List<Enemy>();
+        public static List<string> roundEnemyNamesList = new List<string>();
         public static List<EnemyStatus> currentEnemyStatus = new List<EnemyStatus>();
 
         [HarmonyPatch("Start")]
@@ -46,13 +47,22 @@ namespace TalkingCart.Patches
             ValuableObjectsRecords.levelValuables.Clear();
             enemyParentList.Clear();
             enemyList.Clear();
-            enemyParentList.Clear();
+            roundEnemyNamesList.Clear();
             currentEnemyStatus.Clear();
             initialEnemiesCommunicated = false;
 
             CartVocalPatch.carts.Clear();
 
             TalkingCartBase.mls.LogInfo("Resetting enemy lists!");
+        }
+
+        public static void AddEnemy(EnemyParent enemyParent, Enemy enemy)
+        {
+            enemyParentList.Add(enemyParent);
+            enemyList.Add(enemy);
+            currentEnemyStatus.Add(EnemyStatus.Present);
+
+            if (!roundEnemyNamesList.Contains(enemyParent.enemyName)) roundEnemyNamesList.Add(enemyParent.enemyName);
         }
     }
 }

@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using static System.Net.Mime.MediaTypeNames;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem;
 
 namespace TalkingCart.Patches
 {
@@ -24,13 +25,15 @@ namespace TalkingCart.Patches
 
             if(ChatManagerPatch.chatState != ChatManager.ChatState.Active) // Ignore input when player is writing in chat.
             {
-                if (Input.GetKeyDown(ConfigManager.communicateNearbyItemsKey.Value))
+                InputControl val1 = ((InputControl)Keyboard.current)[ConfigManager.communicateNearbyItemsKey.Value];
+                if (((ButtonControl)val1).wasPressedThisFrame)
                 {
                     CartTalkingManager cart = GetGrabbedCart();
                     if (cart != null) cart.CommunicateNearbyItems();
                 }
 
-                if (Input.GetKeyDown(ConfigManager.toggleCommunicationsKey.Value)) // Disable/enable cart communications.
+                InputControl val2 = ((InputControl)Keyboard.current)[ConfigManager.toggleCommunicationsKey.Value];
+                if (((ButtonControl)val2).wasPressedThisFrame)
                 {
                     CartTalkingManager cart = GetGrabbedCart();
                     if (cart != null) cart.ToggleComms();
