@@ -24,6 +24,9 @@ namespace TalkingCart.Patches
             if (__instance.isSmallCart) return;
 
             CartTalkingManager cart = __instance.gameObject.AddComponent<CartTalkingManager>();
+            CartRoastSync cartRoastSync = __instance.gameObject.AddComponent<CartRoastSync>();
+            cart.cartRoastSync = cartRoastSync;
+            cartRoastSync.cart = cart;
             carts.Add(cart);
 
             cartsPhysGrabObjects.Add(___physGrabObject);

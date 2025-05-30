@@ -23,11 +23,12 @@ namespace TalkingCart.Patches
         // Cart details.
         PhysGrabCart physGrabCart;
         public bool isCartBeingPulled = false;
+        public CartRoastSync cartRoastSync;
 
         // Cart voicing variables.
         Sound cartSound = new Sound();
         Speech cartSpeech;
-        Queue<AudioClip> cartVoiceQueue = new Queue<AudioClip>();
+        public Queue<AudioClip> cartVoiceQueue = new Queue<AudioClip>();
         Queue<float> cartVoiceDelayQueue = new Queue<float>();
         Queue<string> cartTextQueue = new Queue<string>();
 
@@ -513,6 +514,51 @@ namespace TalkingCart.Patches
             EnqueueValues(TalkingCartBase.SoundFX[vlInd], 0.2f, fullText);
         }
 
+        /*******************************/
+        /*************ROAST*************/
+        /*******************************/
+
+        //public void AttemptRoast()
+        //{
+        //    if(cartVoiceQueue.Count > 0) return;
+        //    float chanceOfReacting = UnityEngine.Random.value;
+        //    if (chanceOfReacting >= 12f) return;
+
+        //    // Choosing track.
+        //    int rand = UnityEngine.Random.Range(0, 40);
+
+        //    int numberOfPlayers = FindObjectsOfType<PlayerAvatar>().Length;
+
+        //    while((rand == 35 || rand == 36) && numberOfPlayers > 1)
+        //    {
+        //        rand = UnityEngine.Random.Range(0, 40);
+        //    }
+
+        //    if (rand >= 37)
+        //    {
+        //        if (rand == 37)
+        //        {
+        //            CartVocalPatch.carts[0].EnqueueValues(TalkingCartBase.RoastsFX[rand], 0, TalkingCartBase.RoastsText[rand]);
+        //            CartVocalPatch.carts[0].EnqueueValues(TalkingCartBase.RoastsFX[rand + 1], 0, TalkingCartBase.RoastsText[rand + 1]);
+        //        } else if (rand == 38)
+        //        {
+        //            int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + 4;
+        //            CartVocalPatch.carts[0].EnqueueValues(TalkingCartBase.SoundFX[clownNearbyInd], 2f, "Clown nearby");
+        //            CartVocalPatch.carts[0].EnqueueValues(TalkingCartBase.RoastsFX[rand + 1], 0, TalkingCartBase.RoastsText[rand+1]);
+        //        } else
+        //        {
+        //            CartVocalPatch.carts[0].EnqueueValues(TalkingCartBase.RoastsFX[rand + 1], 0, TalkingCartBase.RoastsText[rand+1]);
+        //            CartVocalPatch.carts[0].EnqueueValues(TalkingCartBase.RoastsFX[rand + 2], 0, TalkingCartBase.RoastsText[rand+2]);
+
+        //        }
+        //    } else
+        //    {
+        //        CartVocalPatch.carts[0].EnqueueValues(TalkingCartBase.RoastsFX[rand], 0, TalkingCartBase.RoastsText[rand]);
+        //    }
+        //}
+
+
+
 
         /*******************************/
         /*************QUEUE*************/
@@ -543,7 +589,7 @@ namespace TalkingCart.Patches
             return audioClips;
         }
 
-        void EnqueueValues(AudioClip audioClip, float delay, string text)
+        public void EnqueueValues(AudioClip audioClip, float delay, string text)
         {
             // If comms is off, return.
             if (!isCommEnabled) return;

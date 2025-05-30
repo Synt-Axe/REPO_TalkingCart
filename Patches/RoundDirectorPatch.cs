@@ -44,7 +44,7 @@ namespace TalkingCart.Patches
         static void StartPatch()
         {
             // This runs when the level is changing.
-            ValuableObjectsRecords.levelValuables.Clear();
+            ValuableObjectsRecords.ResetLists();
             enemyParentList.Clear();
             enemyList.Clear();
             roundEnemyNamesList.Clear();
@@ -52,6 +52,7 @@ namespace TalkingCart.Patches
             initialEnemiesCommunicated = false;
 
             CartVocalPatch.carts.Clear();
+
 
             TalkingCartBase.mls.LogInfo("Resetting enemy lists!");
         }
