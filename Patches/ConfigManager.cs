@@ -12,8 +12,7 @@ namespace TalkingCart.Patches
         public static ConfigEntry<string> communicateNearbyItemsKey;
         public static ConfigEntry<string> toggleCommunicationsKey;
         public static ConfigEntry<float> cartVoiceFalloffMultiplier;
-        //public static ConfigEntry<float> cartChanceToReactToDamagingItems;
-        //public static ConfigEntry<float> cartItemBreakSeeingDistance;
+        public static ConfigEntry<float> cartChanceToReactToDamagingItems;
 
         public static void Initialize(ConfigFile cfg)
         {
@@ -22,8 +21,7 @@ namespace TalkingCart.Patches
 
             cartVoiceFalloffMultiplier = cfg.Bind<float>("Audio", "CartVoiceFalloffMultiplier", 1.5f, "This number indicates how far away the player can hear the cart from.");
 
-            //cartChanceToReactToDamagingItems = cfg.Bind<float>("Behaviour", "CartChanceToReactToDamagingItems", 0.2f, "This number indicates how likely the cart is to roast a player if they damage or break an item next to it. Set to 0  if you want it disabled.");
-            //cartItemBreakSeeingDistance = cfg.Bind<float>("Behaviour", "CartItemBreakSeeingDistance", 12f, "This number indicates how far away the cart can 'see' an item break from. Increasing the number will make the cart react even if an item broke further away.");
+            cartChanceToReactToDamagingItems = cfg.Bind<float>("Behaviour", "CartChanceToReactToDamagingItems", 0.1f, "This number indicates how likely the cart is to roast a player if they damage or break an item next to it. Set to 0  if you want it disabled.");
         }
     }
 }

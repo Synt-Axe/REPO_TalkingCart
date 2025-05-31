@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using SelfMovingCart.Patches;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace TalkingCart.Patches
             levelValuables.Add(__instance);
             isValidForRoast.Add(false);
             roastValidityCoroutines.Add(null);
-            valuableLastValue.Add(__instance.dollarValueCurrent); // All valuables are worth 100 at the start.
+            valuableLastValue.Add(100); // All valuables are worth 100 at the start. This value is changed in the first update.
         }
 
         [HarmonyPatch("Update")]
@@ -32,7 +33,8 @@ namespace TalkingCart.Patches
         static void UpdatePatch(ValuableObject __instance)
         {
             int ind = levelValuables.IndexOf(__instance);
-            if (__instance.dollarValueCurrent < valuableLastValue[ind])
+            float dollarValueCurrent = ReflectionHelper.GetPrivateField<float>(__instance, "dollarValueCurrent");
+            if (dollarValueCurrent < valuableLastValue[ind])
             {
                 // Damaged.
                 CartTalkingManager closestCart = CartVocalPatch.carts[0];
@@ -46,15 +48,15 @@ namespace TalkingCart.Patches
                         closestDist = dist;
                     }
                 }
-                if(closestDist <= 12f)
+                if(closestDist <= 12f && isValidForRoast[ind])
                 {
                     closestCart.cartRoastSync.AttemptRoast();
                 }
             }
             // Keeping track of value in each frame.
-            if(__instance.dollarValueCurrent != valuableLastValue[ind])
+            if(dollarValueCurrent != valuableLastValue[ind])
             {
-                valuableLastValue[ind] = __instance.dollarValueCurrent;
+                valuableLastValue[ind] = dollarValueCurrent;
             }
         }
 

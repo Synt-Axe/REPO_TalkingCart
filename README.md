@@ -7,7 +7,7 @@ It was created as a part of the following YouTube video: https://youtu.be/naOCUk
 
 # Supported Features
 
-- The cart has a chance of reacting (aggressively) if you damage an item in front of it.
+- The cart has a chance of reacting (aggressively) if you damage an item in front of it. You're also able to configure how high/low the chance is from the config file.
 - The cart will tell the players which enemies are present in the level at the start of each level.
 - If an enemy enters the area around the cart (within a 20 units of the cart's position), the cart will warn the players.
 - If an enemy that has been communicated as near exits the area around the cart (more than 23 units away from the cart), the cart will notify the players

@@ -16,52 +16,30 @@ namespace TalkingCart.Patches
         {
             if (cart.cartVoiceQueue.Count > 0) return;
             float chanceOfReacting = UnityEngine.Random.value;
-            if (chanceOfReacting >= 0.2f) return;
+            if (chanceOfReacting >= ConfigManager.cartChanceToReactToDamagingItems.Value) return;
 
             // Choosing track.
-            int rand = UnityEngine.Random.Range(0, 40);
+            int rand = UnityEngine.Random.Range(0, TalkingCartBase.RoastsFX.Count);
 
             int numberOfPlayers = FindObjectsOfType<PlayerAvatar>().Length;
 
-            while ((rand == 35 || rand == 36) && numberOfPlayers > 1)
+            while ((rand == 34 || rand == 35) && numberOfPlayers > 1)
             {
-                rand = UnityEngine.Random.Range(0, 40);
+                rand = UnityEngine.Random.Range(0, TalkingCartBase.RoastsFX.Count);
             }
 
             List<int> inds = new List<int> ();
             List<float> delays = new List<float> ();
 
-            if (rand >= 37)
+            if (rand == 36)
             {
-                if (rand == 37)
-                {
-                    inds.Add(rand);
-                    delays.Add(0);
-                    inds.Add(rand + 1);
-                    delays.Add(0);
-                }
-                else if (rand == 38)
-                {
-                    int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + 4;
+                int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + 4;
 
-                    inds.Add(-1);
-                    delays.Add(2);
-                    inds.Add(rand + 1);
-                    delays.Add(0);
-                }
-                else
-                {
-                    inds.Add(rand + 1);
-                    delays.Add(0);
-                    inds.Add(rand + 2);
-                    delays.Add(0);
-                }
+                inds.Add(-1);
+                delays.Add(2);
             }
-            else
-            {
-                inds.Add(rand);
-                delays.Add(0);
-            }
+            inds.Add(rand);
+            delays.Add(0);
 
             if (SemiFunc.IsMultiplayer())
                 base.photonView.RPC("AttemptRoastRPC", RpcTarget.All, inds.ToArray(), delays.ToArray());
