@@ -23,7 +23,7 @@ namespace TalkingCart.Patches
 
             int numberOfPlayers = FindObjectsOfType<PlayerAvatar>().Length;
 
-            while ((rand == 34 || rand == 35) && numberOfPlayers > 1)
+            while ((rand == 32 || rand == 33) && numberOfPlayers > 1)
             {
                 rand = UnityEngine.Random.Range(0, TalkingCartBase.RoastsFX.Count);
             }
@@ -31,7 +31,7 @@ namespace TalkingCart.Patches
             List<int> inds = new List<int> ();
             List<float> delays = new List<float> ();
 
-            if (rand == 36)
+            if (rand == 34)
             {
                 int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + 4;
 
