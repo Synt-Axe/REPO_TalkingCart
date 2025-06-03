@@ -645,23 +645,39 @@ namespace TalkingCart.Patches
             TalkingCartBase.mls.LogInfo($"Is comm enabled: {isCommEnabled}");
         }
 
-        Transform CreateInstructionUI()
+        Transform CreateUIElement()
         {
-            // Getting the HUD parent.
-            Transform hudCanvas = GameObject.FindObjectsOfType<Canvas>()[1].transform;
-            Transform gameHudObject = hudCanvas.GetChild(0).GetChild(0); // This is where all the screen ui is kept.
+            GameObject hud = GameObject.Find("Game Hud");
+            GameObject haul = GameObject.Find("Tax Haul");
+            if (hud == null || haul == null)
+                return null;
 
-            // Creating the instruction text ui as a copy from the extraction count ui text.
-            Transform instructionUI = GameObject.Instantiate(gameHudObject.GetChild(0), gameHudObject);
+            TMP_FontAsset font = haul.GetComponent<TMP_Text>().font;
+            GameObject textInstance = new GameObject("Cart Mode HUD");
+            textInstance.SetActive(false);
+            textInstance.AddComponent<TextMeshProUGUI>();
 
-            // Removing the unnecessary script.
-            GoalUI goalUI = instructionUI.GetComponent<GoalUI>();
-            if (goalUI != null) GameObject.Destroy(goalUI);
+            TextMeshProUGUI textComponent = textInstance.GetComponent<TextMeshProUGUI>();
+            textComponent.font = font;
+            textComponent.color = Color.white;
+            textComponent.fontSize = 20f;
+            textComponent.enableWordWrapping = false;
+            textComponent.alignment = TextAlignmentOptions.TopRight;
+            textComponent.horizontalAlignment = HorizontalAlignmentOptions.Right;
+            textComponent.verticalAlignment = VerticalAlignmentOptions.Top;
 
-            // Removing scanlines.
-            Destroy(instructionUI.GetChild(0).gameObject);
+            textInstance.transform.SetParent(hud.transform, false);
 
-            return instructionUI;
+            // Set the position.
+            RectTransform component = textInstance.GetComponent<RectTransform>();
+
+            component.pivot = new Vector2(1f, 1f);
+            component.anchoredPosition = new Vector2(-4f, -11f);
+            component.anchorMin = new Vector2(1f, 1f);
+            component.anchorMax = new Vector2(1f, 1f);
+            component.sizeDelta = new Vector2(200f, 50f);
+
+            return textInstance.transform;
         }
 
         void HandleCartUI()
@@ -683,30 +699,30 @@ namespace TalkingCart.Patches
             // If the cart is being handdled by the player, but the ui is not initialized yet, we initialize it.
             if (enableInstructionTMP == null)
             {
-                Transform instructionUI = CreateInstructionUI();
+                Transform instructionUI = CreateUIElement();
 
                 // Getting the relevant components.
                 RectTransform instructionRectTransform = instructionUI.GetComponent<RectTransform>();
                 enableInstructionTMP = instructionUI.GetComponent<TextMeshProUGUI>();
 
+                instructionUI.gameObject.SetActive(true);
+
                 // Customizing the text.
-                instructionRectTransform.anchoredPosition = new Vector2(-4f, -70f);
-                enableInstructionTMP.color = Color.white;
-                enableInstructionTMP.fontSize = 20;
+                instructionRectTransform.anchoredPosition = new Vector2(-4f, -80f);
             }
             // If the cart is being handdled by the player, but the ui is not initialized yet, we initialize it.
             if (itemsInstructionTMP == null)
             {
-                Transform instructionUI = CreateInstructionUI();
+                Transform instructionUI = CreateUIElement();
 
                 // Getting the relevant components.
                 RectTransform instructionRectTransform = instructionUI.GetComponent<RectTransform>();
                 itemsInstructionTMP = instructionUI.GetComponent<TextMeshProUGUI>();
 
+                instructionUI.gameObject.SetActive(true);
+
                 // Customizing the text.
-                instructionRectTransform.anchoredPosition = new Vector2(-4f, -100f);
-                itemsInstructionTMP.color = Color.white;
-                itemsInstructionTMP.fontSize = 20;
+                instructionRectTransform.anchoredPosition = new Vector2(-4f, -110f);
             }
 
             // Set the ui text for enable/disable instruction.

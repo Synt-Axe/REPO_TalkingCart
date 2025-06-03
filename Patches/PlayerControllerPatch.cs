@@ -25,15 +25,14 @@ namespace TalkingCart.Patches
 
             if(ChatManagerPatch.chatState != ChatManager.ChatState.Active) // Ignore input when player is writing in chat.
             {
-                InputControl val1 = ((InputControl)Keyboard.current)[ConfigManager.communicateNearbyItemsKey.Value];
-                if (((ButtonControl)val1).wasPressedThisFrame)
+
+                if (WasButtonPressedThisFrame(ConfigManager.communicateNearbyItemsKey.Value))
                 {
                     CartTalkingManager cart = GetGrabbedCart();
                     if (cart != null) cart.CommunicateNearbyItems();
                 }
 
-                InputControl val2 = ((InputControl)Keyboard.current)[ConfigManager.toggleCommunicationsKey.Value];
-                if (((ButtonControl)val2).wasPressedThisFrame)
+                if (WasButtonPressedThisFrame(ConfigManager.toggleCommunicationsKey.Value))
                 {
                     CartTalkingManager cart = GetGrabbedCart();
                     if (cart != null) cart.ToggleComms();
@@ -47,6 +46,21 @@ namespace TalkingCart.Patches
             if (PlayerAvatarPatch.localPlayerPhysGrabber.grabbedObjectTransform != null)
                 return PlayerAvatarPatch.localPlayerPhysGrabber.grabbedObjectTransform.GetComponent<CartTalkingManager>();
             return null;
+        }
+
+        static List<string> mouseBtns = new List<string>() { "leftButton", "rightButton", "middleButton", "forwardButton", "backButton" };
+        static bool WasButtonPressedThisFrame(string btn)
+        {
+            InputControl val;
+            if (mouseBtns.Contains(btn))
+            {
+                val = ((InputControl)Mouse.current)[btn];
+            } else
+            {
+                val = ((InputControl)Keyboard.current)[btn];
+            }
+
+            return ((ButtonControl)val).wasPressedThisFrame;
         }
     }
 }
