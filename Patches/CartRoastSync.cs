@@ -56,11 +56,29 @@ namespace TalkingCart.Patches
                 if(ind == -1)
                 {
                     // Clown line.
-                    int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + 4;
-                    cart.EnqueueValues(TalkingCartBase.SoundFX[clownNearbyInd], delays[i], "Clown nearby");
+                    if (ConfigManager.alwaysUseGameTTSToVoiceCart.Value) // Use TTS.
+                    {
+                        string fullText = "Clown nearby";
+                        List<AudioClip> audioClips = cart.TTSGenerateAudioClip(fullText);
+                        foreach (AudioClip audioClip in audioClips) cart.EnqueueValues(audioClip, delays[i], fullText);
+                    } else
+                    {
+                        int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + 4;
+                        cart.EnqueueValues(TalkingCartBase.SoundFX[clownNearbyInd], delays[i], "Clown nearby");
+                    }
                 } else
                 {
-                    cart.EnqueueValues(TalkingCartBase.RoastsFX[ind], delays[i], TalkingCartBase.RoastsText[ind]);
+                    if (ConfigManager.alwaysUseGameTTSToVoiceCart.Value) // Use TTS.
+                    {
+                        string fullText = TalkingCartBase.RoastsText[ind];
+                        List<AudioClip> audioClips = cart.TTSGenerateAudioClip(fullText);
+                        foreach (AudioClip audioClip in audioClips) cart.EnqueueValues(audioClip, delays[i], fullText);
+                    } else
+                    {
+                        cart.EnqueueValues(TalkingCartBase.RoastsFX[ind], delays[i], TalkingCartBase.RoastsText[ind]);
+                    }
+
+                        
                 }
             }
         }

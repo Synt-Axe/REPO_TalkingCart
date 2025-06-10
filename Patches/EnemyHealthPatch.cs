@@ -14,10 +14,13 @@ namespace TalkingCart.Patches
         [HarmonyPrefix]
         static void EnemyDeathPatch(Enemy ___enemy)
         {
-            int enemyInd = RoundDirectorPatch.enemyList.IndexOf(___enemy);
-            foreach(CartTalkingManager cart in CartVocalPatch.carts)
+            if (ConfigManager.warnAboutEnemies.Value)
             {
-                cart.HandleDeadEnemy(enemyInd);
+                int enemyInd = RoundDirectorPatch.enemyList.IndexOf(___enemy);
+                foreach (CartTalkingManager cart in CartVocalPatch.carts)
+                {
+                    cart.HandleDeadEnemy(enemyInd);
+                }
             }
         }
     }
