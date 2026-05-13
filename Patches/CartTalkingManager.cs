@@ -93,7 +93,7 @@ namespace TalkingCart.Patches
             InitializeVariables();
 
             // Setup cart sound source.
-            Sound.CopySound(physGrabCart.soundHaulIncrease, cartSound);
+            Sound.CopySound(physGrabCart.valueScreen.soundValueIncrease, cartSound);
             cartSound.Volume = 1f;
             cartSound.Pitch = 1f;
             cartSound.PitchRandom = 0f;
@@ -583,7 +583,7 @@ namespace TalkingCart.Patches
             float delay = cartVoiceDelayQueue.Dequeue();
             cartSound.Sounds = new AudioClip[] { nextClip };
             cartVoiceTimer = nextClip.length + delay; // Used to add a buffer between sentences.
-            cartSound.Play(physGrabCart.displayText.transform.position, falloffMultiplier: ConfigManager.cartVoiceFalloffMultiplier.Value);
+            cartSound.Play(physGrabCart.valueScreen.displayText.transform.position, falloffMultiplier: ConfigManager.cartVoiceFalloffMultiplier.Value);
 
             // Set the cart text.
             string text = cartTextQueue.Dequeue();
