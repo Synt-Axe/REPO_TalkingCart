@@ -35,14 +35,14 @@ namespace TalkingCart
         public static int LevelEnemiesVLInd = 2;
 
         public static int EnemyDespawnedInd = 3;
-        public static int EnemyDiedInd = 22;
-        public static int EnemyLeftInd = 41;
-        public static int EnemyNamesPluralInd = 60;
-        public static int EnemyNamesSingularInd = 79;
-        public static int EnemyNearbyInd = 98;
-        public static int EnemyRespawnedInd = 117;
+        public static int EnemyDiedInd = 32;
+        public static int EnemyLeftInd = 61;
+        public static int EnemyNamesPluralInd = 90;
+        public static int EnemyNamesSingularInd = 119;
+        public static int EnemyNearbyInd = 148;
+        public static int EnemyRespawnedInd = 177;
 
-        public static int NumbersInd = 136;
+        public static int NumbersInd = 206;
 
 
         void Awake()

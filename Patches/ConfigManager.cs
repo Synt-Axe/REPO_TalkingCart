@@ -20,6 +20,7 @@ namespace TalkingCart.Patches
         // Behaviour
         public static ConfigEntry<float> cartChanceToReactToDamagingItems;
         public static ConfigEntry<bool> warnAboutEnemies;
+        public static ConfigEntry<bool> sayEnemyDied;
 
         public static void Initialize(ConfigFile cfg)
         {
@@ -31,6 +32,7 @@ namespace TalkingCart.Patches
 
             cartChanceToReactToDamagingItems = cfg.Bind<float>("Behaviour", "CartChanceToReactToDamagingItems", 0.1f, "This number indicates how likely the cart is to roast a player if they damage or break an item next to it. Set to 0  if you want it disabled.");
             warnAboutEnemies = cfg.Bind<bool>("Behaviour", "WarnAboutEnemies", true, "When this is turned off, the cart will no longer warn the player about enemies.");
+            sayEnemyDied = cfg.Bind<bool>("Behaviour", "SayEnemyDied", true, "When this is turned off, the cart will always say 'Enemy Despawned' regardless of whether the enemy despawned naturally or the player killed it.");
         }
     }
 }

@@ -28,10 +28,10 @@ namespace TalkingCart.Patches
             Dead
         }
 
-        public static string[] enemyNames = new string[] { "Animal", "Banger", "Bowtie", "Chef", "Clown", "Apex Predator", "Gnome", "Headman", "Hidden", "Huntsman", "Mentalist", "Peeper", "Reaper", "Robe", "Rugrat", "Shadow Child", "Spewer", "Trudge", "Upscream" };
+        public static string[] enemyNames = new string[] { "Animal", "Banger", "Bella", "Birthday Boy", "Bowtie", "Chef", "Cleanup Crew", "Clown", "Apex Predator", "Elsa", "Gambit", "Gnome", "Headgrab", "Headman", "Heart Hugger", "Hidden", "Huntsman", "Loom", "Mentalist", "Oogly", "Peeper", "Reaper", "Robe", "Rugrat", "Shadow Child", "Spewer", "Tick", "Trudge", "Upscream" };
 
-        public static string[] enemyNamesTextSingular = new string[] { "Animal", "Banger", "Bowtie", "Chef", "Clown", "Duck", "Gnome", "Headman", "Hidden", "Huntsman", "Mentalist", "Peeper", "Reaper", "Robe", "Rugrat", "Shadow Child", "Spewer", "Trudge", "Upscream" };
-        public static string[] enemyNamesTextPlural = new string[] { "Animals", "Bangers", "Bowties", "Chefs", "Clowns", "Ducks", "Gnomes", "Headmen", "Hiddens", "Huntsmen", "Mentalists", "Peepers", "Reapers", "Robes", "Rugrats", "Shadow Children", "Spewers", "Trudges", "Upscreams" };
+        public static string[] enemyNamesTextSingular = new string[] { "Animal", "Banger", "Bella", "Birthday Boy", "Bowtie", "Chef", "Cleanup Crew", "Clown", "Duck", "Elsa", "Gambit", "Gnome", "Headgrab", "Headman", "Heart Hugger", "Hidden", "Huntsman", "Loom", "Mentalist", "Oogly", "Peeper", "Reaper", "Robe", "Rugrat", "Shadow Child", "Spewer", "Tick", "Trudge", "Upscream" };
+        public static string[] enemyNamesTextPlural = new string[] { "Animals", "Bangers", "Bellas", "Birthday Boys", "Bowties", "Chefs", "Cleanup Crews", "Clowns", "Ducks", "Elsas", "Gambits", "Gnomes", "Headgrabs", "Headmen", "Heart Huggers", "Hiddens", "Huntsmen", "Looms", "Mentalists", "Ooglies", "Peepers", "Reapers", "Robes", "Rugrats", "Shadow Children", "Spewers", "Ticks", "Trudges", "Upscreams" };
 
         public static bool initialEnemiesCommunicated = false;
         public static List<EnemyParent> enemyParentList = new List<EnemyParent>();

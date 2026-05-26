@@ -14,7 +14,7 @@ namespace TalkingCart.Patches
         [HarmonyPrefix]
         static void EnemyDeathPatch(Enemy ___enemy)
         {
-            if (ConfigManager.warnAboutEnemies.Value)
+            if (ConfigManager.warnAboutEnemies.Value && ConfigManager.sayEnemyDied.Value)
             {
                 int enemyInd = RoundDirectorPatch.enemyList.IndexOf(___enemy);
                 foreach (CartTalkingManager cart in CartVocalPatch.carts)
