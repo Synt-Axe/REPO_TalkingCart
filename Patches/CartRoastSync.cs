@@ -23,6 +23,7 @@ namespace TalkingCart.Patches
 
             int numberOfPlayers = FindObjectsOfType<PlayerAvatar>().Length;
 
+            // Handling the singleplayer only roasts.
             while ((rand == 32 || rand == 33) && numberOfPlayers > 1)
             {
                 rand = UnityEngine.Random.Range(0, TalkingCartBase.RoastsFX.Count);
@@ -33,8 +34,6 @@ namespace TalkingCart.Patches
 
             if (rand == 34)
             {
-                int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + 4;
-
                 inds.Add(-1);
                 delays.Add(2);
             }
@@ -63,7 +62,8 @@ namespace TalkingCart.Patches
                         foreach (AudioClip audioClip in audioClips) cart.EnqueueValues(audioClip, delays[i], fullText);
                     } else
                     {
-                        int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + 4;
+                        int clownInd = Array.IndexOf(RoundDirectorPatch.enemyNames, "Clown");
+                        int clownNearbyInd = TalkingCartBase.EnemyNearbyInd + clownInd;
                         cart.EnqueueValues(TalkingCartBase.SoundFX[clownNearbyInd], delays[i], "Clown nearby");
                     }
                 } else

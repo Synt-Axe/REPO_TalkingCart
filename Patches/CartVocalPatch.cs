@@ -14,7 +14,6 @@ namespace TalkingCart.Patches
     class CartVocalPatch
     {
         public static List<CartTalkingManager> carts = new List<CartTalkingManager>();
-        static List<PhysGrabObject> cartsPhysGrabObjects = new List<PhysGrabObject>(); // TODO clear it in Round Director.
 
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
@@ -28,8 +27,6 @@ namespace TalkingCart.Patches
             cart.cartRoastSync = cartRoastSync;
             cartRoastSync.cart = cart;
             carts.Add(cart);
-
-            cartsPhysGrabObjects.Add(___physGrabObject);
         }
 
         [HarmonyPatch("Update")]
@@ -40,6 +37,11 @@ namespace TalkingCart.Patches
             if (__instance.isSmallCart) return;
 
             CartTalkingManager cart = __instance.GetComponent<CartTalkingManager>();
+            if(cart == null)
+            {
+                Debug.LogWarning("WARNING: Unable to find CartTalkingManager instance on the cart.");
+                return;
+            }
             cart.isCartBeingPulled = ___cartBeingPulled;
         }
 

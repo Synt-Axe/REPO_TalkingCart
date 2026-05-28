@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using static TalkingCart.Patches.RoundDirectorPatch;
 
 namespace TalkingCart.Patches
@@ -18,10 +19,16 @@ namespace TalkingCart.Patches
             if (RoundDirectorPatch.initialEnemiesCommunicated)
             {
                 int enemyNameInd = Array.IndexOf(RoundDirectorPatch.enemyNames, __instance.enemyName);
-                if (enemyNameInd == 1 || enemyNameInd == 6) // Gnomes and Bangers
+                if (enemyNameInd == 1 || enemyNameInd == 11) // Gnomes and Bangers
                     return;
 
                 int enemyInd = RoundDirectorPatch.enemyParentList.IndexOf(__instance);
+                if (enemyInd == -1)
+                {
+                    Debug.LogWarning("WARN: An enemy that is not in the enemies parents list has despawned.");
+                    return;
+                }
+
                 RoundDirectorPatch.currentEnemyStatus[enemyInd] = EnemyStatus.Absent;
 
                 TalkingCartBase.mls.LogInfo($"Enemy Despawned Start: {__instance.enemyName}");
@@ -35,10 +42,16 @@ namespace TalkingCart.Patches
             if (RoundDirectorPatch.initialEnemiesCommunicated)
             {
                 int enemyNameInd = Array.IndexOf(RoundDirectorPatch.enemyNames, __instance.enemyName);
-                if (enemyNameInd == 1 || enemyNameInd == 6) // Gnomes and Bangers
+                if (enemyNameInd == 1 || enemyNameInd == 11) // Gnomes and Bangers
                     return;
 
                 int enemyInd = RoundDirectorPatch.enemyParentList.IndexOf(__instance);
+                if (enemyInd == -1)
+                {
+                    Debug.LogWarning("WARN: An enemy that is not in the enemies parents list has despawned.");
+                    return;
+                }
+
                 RoundDirectorPatch.currentEnemyStatus[enemyInd] = EnemyStatus.Present;
 
                 TalkingCartBase.mls.LogInfo($"Enemy Respawned Start: {__instance.enemyName}");

@@ -282,7 +282,7 @@ namespace TalkingCart.Patches
                     EnemyStatus enemyStatus = RoundDirectorPatch.currentEnemyStatus[i];
                     int vanillaEnemyNameInd = Array.IndexOf(RoundDirectorPatch.enemyNames, enemyParent.enemyName);
 
-                    if (vanillaEnemyNameInd == 1 || vanillaEnemyNameInd == 6) // Gnomes and Bangers
+                    if (vanillaEnemyNameInd == 1 || vanillaEnemyNameInd == 11) // Gnomes and Bangers
                         continue;
 
                     // If enemy is despawned/dead, don't check.
@@ -449,7 +449,7 @@ namespace TalkingCart.Patches
             // If this enemy's death/despawn was already communicated, return.
             if (lastCommunicatedStatus[enemyInd] == EnemyCommState.Despawned || lastCommunicatedStatus[enemyInd] == EnemyCommState.Dead)
             {
-                TalkingCartBase.mls.LogError("Enemy death ignored!");
+                TalkingCartBase.mls.LogWarning("Enemy death ignored!");
                 return;
             }
 
@@ -457,7 +457,7 @@ namespace TalkingCart.Patches
             TalkingCartBase.mls.LogInfo($"Enemy Died End: {enemyParent.enemyName}");
 
             int vanillaEnemyNameInd = Array.IndexOf(RoundDirectorPatch.enemyNames, enemyParent.enemyName);
-            if (vanillaEnemyNameInd == 1 || vanillaEnemyNameInd == 6) // Gnomes and Bangers
+            if (vanillaEnemyNameInd == 1 || vanillaEnemyNameInd == 11) // Gnomes and Bangers
                 return;
 
             // Adding the voice to queue.
@@ -647,6 +647,14 @@ namespace TalkingCart.Patches
 
         void HandleCartUI()
         {
+            // If the player disabled the "enableUIInstructions" config option, the UI never shows up.
+            if (!ConfigManager.enableUIInstructions.Value)
+            {
+                if (enableInstructionTMP != null) enableInstructionTMP.text = "";
+                if (itemsInstructionTMP != null) itemsInstructionTMP.text = "";
+                return;
+            }
+
             // If the cart is not being handled by the player and no other cart is being handled by the player either, we hide the text. (If it's already initiated and it's not already hidden)
             if (PlayerControllerPatch.GetGrabbedCart() != this)
             {
