@@ -24,7 +24,7 @@ namespace TalkingCart.Patches
             int numberOfPlayers = FindObjectsOfType<PlayerAvatar>().Length;
 
             // Handling the singleplayer only roasts.
-            while ((rand == 32 || rand == 33) && numberOfPlayers > 1)
+            while (((rand == 32 || rand == 33) && numberOfPlayers > 1) || rand == 21) // Temporarly disabling the 21st roast which is now outdated.
             {
                 rand = UnityEngine.Random.Range(0, TalkingCartBase.RoastsFX.Count);
             }

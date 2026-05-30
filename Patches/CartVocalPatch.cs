@@ -15,20 +15,6 @@ namespace TalkingCart.Patches
     {
         public static List<CartTalkingManager> carts = new List<CartTalkingManager>();
 
-        [HarmonyPatch("Start")]
-        [HarmonyPostfix]
-        static void StartPatch(PhysGrabCart __instance, ref PhysGrabObject ___physGrabObject)
-        {
-            // Small carts are not included.
-            if (__instance.isSmallCart) return;
-
-            CartTalkingManager cart = __instance.gameObject.AddComponent<CartTalkingManager>();
-            CartRoastSync cartRoastSync = __instance.gameObject.AddComponent<CartRoastSync>();
-            cart.cartRoastSync = cartRoastSync;
-            cartRoastSync.cart = cart;
-            carts.Add(cart);
-        }
-
         [HarmonyPatch("Update")]
         [HarmonyPostfix]
         static void UpdatePatch(PhysGrabCart __instance, ref bool ___cartBeingPulled)
@@ -39,10 +25,22 @@ namespace TalkingCart.Patches
             CartTalkingManager cart = __instance.GetComponent<CartTalkingManager>();
             if(cart == null)
             {
-                Debug.LogWarning("WARNING: Unable to find CartTalkingManager instance on the cart.");
-                return;
+                Debug.Log("Creating CartTalkingManager instance on cart \"" + __instance.name + "\".");
+                cart = SetupCart(__instance);
             }
             cart.isCartBeingPulled = ___cartBeingPulled;
+        }
+
+        static CartTalkingManager SetupCart(PhysGrabCart physGrabCart)
+        {
+            CartTalkingManager cart = physGrabCart.gameObject.AddComponent<CartTalkingManager>();
+            CartRoastSync cartRoastSync = physGrabCart.GetComponent<CartRoastSync>();
+            if (cartRoastSync == null) cartRoastSync = physGrabCart.gameObject.AddComponent<CartRoastSync>();
+            cart.cartRoastSync = cartRoastSync;
+            cartRoastSync.cart = cart;
+            carts.Add(cart);
+
+            return cart;
         }
 
         public static void AddEnemyRecordToAllCarts()
