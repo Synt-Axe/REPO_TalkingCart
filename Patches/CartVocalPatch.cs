@@ -28,6 +28,11 @@ namespace TalkingCart.Patches
                 Debug.Log("Creating CartTalkingManager instance on cart \"" + __instance.name + "\".");
                 cart = SetupCart(__instance);
             }
+            else if (!carts.Contains(cart))
+            {
+                Debug.Log("Re-added existing CartTalkingManager to carts list for cart \"" + __instance.name + "\".");
+                carts.Add(cart);
+            }
             cart.isCartBeingPulled = ___cartBeingPulled;
         }
 

@@ -16,7 +16,7 @@ namespace TalkingCart
     {
         private const string modGUID = "Syntaxe.TalkingCart";
         private const string modName = "Talking Cart";
-        private const string modVersion = "1.0.0";
+        private const string modVersion = "1.5.2";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 

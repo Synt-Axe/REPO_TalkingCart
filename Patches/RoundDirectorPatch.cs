@@ -51,8 +51,15 @@ namespace TalkingCart.Patches
             currentEnemyStatus.Clear();
             initialEnemiesCommunicated = false;
 
+            foreach (CartTalkingManager cart in CartVocalPatch.carts)
+            {
+                cart.lastCommunicatedStatus.Clear();
+                cart.isEnemyNearby.Clear();
+                cart.despawnRespawnTimer.Clear();
+            }
             CartVocalPatch.carts.Clear();
 
+            PlayerControllerPatch.playerPosition = new Vector3(99999f, 0f, 99999f); // Resetting the player posiition so it doesn't trigger the cart's level enemies communication early in the level.
 
             TalkingCartBase.mls.LogInfo("Resetting enemy lists!");
         }

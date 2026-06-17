@@ -64,10 +64,6 @@ namespace TalkingCart.Patches
             cartVoiceDelayQueue = new Queue<float>();
             cartTextQueue = new Queue<string>();
 
-            lastCommunicatedStatus = new List<EnemyCommState>();
-            isEnemyNearby = new List<bool>();
-            despawnRespawnTimer = new List<int>();
-
             cartVoiceTimer = 0f;
             checkTimer = 1f;
         }
@@ -107,8 +103,8 @@ namespace TalkingCart.Patches
 
         void Update()
         {
-            // Communicate the starter enemies if it's a non shop level and it's the first cart grab of the level.
-            if (ConfigManager.warnAboutEnemies.Value && !RoundDirectorPatch.initialEnemiesCommunicated && SemiFunc.RunIsLevel())
+            // Communicate the starter enemies if it's a non shop level, the player is close enough, the level already generated, and the enemies list isn't empty.
+            if (ConfigManager.warnAboutEnemies.Value && !RoundDirectorPatch.initialEnemiesCommunicated && SemiFunc.RunIsLevel() && LevelGenerator.Instance != null && LevelGenerator.Instance.Generated && RoundDirectorPatch.enemyParentList.Count > 0)
             {
                 Vector3 playerPos = new Vector3(PlayerControllerPatch.playerPosition.x, 0, PlayerControllerPatch.playerPosition.z);
                 Vector3 cartPos = new Vector3(transform.position.x, 0, transform.position.z);
@@ -361,7 +357,7 @@ namespace TalkingCart.Patches
         void HandleDespawnedEnemies()
         {
             // We loop through the enemies to see which has despawned.
-            for (int i = 0; i < RoundDirectorPatch.enemyList.Count; i++)
+            for (int i = 0; i < RoundDirectorPatch.enemyList.Count && i < lastCommunicatedStatus.Count; i++)
             {
                 // If this enemy is not absent, continue.
                 if (RoundDirectorPatch.currentEnemyStatus[i] != EnemyStatus.Absent)
@@ -404,7 +400,7 @@ namespace TalkingCart.Patches
         void HandleRespawnedEnemies()
         {
             // We loop through the enemies to see which has respawned.
-            for (int i = 0; i < RoundDirectorPatch.enemyList.Count; i++)
+            for (int i = 0; i < RoundDirectorPatch.enemyList.Count && i < lastCommunicatedStatus.Count; i++)
             {
                 // If this enemy is absent, continue.
                 if (RoundDirectorPatch.currentEnemyStatus[i] != EnemyStatus.Present)
